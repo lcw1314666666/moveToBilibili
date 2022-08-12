@@ -97,7 +97,11 @@ Date.prototype.Format = function (fmt) { // author: meizz
             console.log(historyJSONInfo, 'historyJSONInfo')
             await setJSONList('./historyVideo.json', historyJSONInfo) // 更新下载记录
 
-            // await uploadFile(browser, newVideoObj)
+            await uploadFile(browser, newVideoObj)
+            // 上传完毕保存数据
+            const uploadListHistory = await getJSONList('./historyVideo.json') // 获取历史信息
+            uploadListHistory.push(newVideoObj)
+            await setJSONList('./uploadOver.json', uploadListHistory) // 更新下载记录
         }
     }
 })();
