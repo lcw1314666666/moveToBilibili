@@ -53,6 +53,19 @@ Date.prototype.Format = function (fmt) { // author: meizz
         return
     }
 
+    // 上传完毕保存数据
+    const uploadListHistory = await getJSONList('./uploadOver.json') // 获取历史信息
+    console.log(`已下载${historyVideoList.length}个，已上传${uploadListHistory.length}个`)
+    const noUploadVideoList = historyVideoList.filter(item => {
+        return uploadListHistory.findIndex(uploadItem => item.videoUrl === uploadItem.videoUrl) === -1
+    })
+    // 如果下载视频没有上传完毕
+    if (noUploadVideoList.length > 0) {
+        for (let i = 0; i < noUploadVideoList.length; i++) {
+            await uploadFile(browser, noUploadVideoList[i])
+        }
+    }
+
     // 下载视频
     const downloadPage = await browser.newPage();
     for (let i = 0; i < 8; i++) {
@@ -98,10 +111,7 @@ Date.prototype.Format = function (fmt) { // author: meizz
             await setJSONList('./historyVideo.json', historyJSONInfo) // 更新下载记录
 
             await uploadFile(browser, newVideoObj)
-            // 上传完毕保存数据
-            const uploadListHistory = await getJSONList('./historyVideo.json') // 获取历史信息
-            uploadListHistory.push(newVideoObj)
-            await setJSONList('./uploadOver.json', uploadListHistory) // 更新下载记录
         }
     }
+
 })();

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { getJSONList } = require('./utils/index.js')
+const { getJSONList, setJSONList } = require('./utils/index.js')
 const PuppeteerUtil = require('./utils/puppeteer.js');
 
 const uploadFile = async function(browser, newVideoObj) {
@@ -17,6 +17,7 @@ const uploadFile = async function(browser, newVideoObj) {
 
     await uploadPage.goto(url) // 进度创作中心
 
+    await uploadPage.waitForXPath('//*[@id="video-up-app"]//input')
     await PuppeteerUtil.uploadFile(uploadPage, { name: newVideoObj.videoName, url: newVideoObj.videoPath }, '//*[@id="video-up-app"]//input') // 上传视频文件
 
     await uploadPage.waitForSelector('#video-up-app > div.content > div > div > div.video-basic > div.form > div:nth-child(4) > div > div > div.type-check-radio-wrp > div:nth-child(2)')
@@ -29,14 +30,21 @@ const uploadFile = async function(browser, newVideoObj) {
     }
 
     // 填写简介
-    let divHandle = await uploadPage.$('.archive-info-editor .metion-toolkit .mention-hidden-input')
-    await uploadPage.evaluate((el, value) => el.setAttribute('textContent', value),
-        divHandle,
-        newVideoObj.videoName
-    )
+    // let divHandle = await uploadPage.$('.archive-info-editor .metion-toolkit .mention-hidden-input')
+    // await uploadPage.evaluate((el, value) => el.setAttribute('textContent', value),
+    //     divHandle,
+    //     newVideoObj.videoName
+    // )
+
+    await uploadPage.waitForTimeout(1000)
 
     // 提交
     await uploadPage.click('.submit-container .submit-add') // 点击转载
+
+    // 上传完毕保存数据
+    const uploadListHistory = await getJSONList('./historyVideo.json') // 获取历史信息
+    uploadListHistory.push(newVideoObj)
+    await setJSONList('./uploadOver.json', uploadListHistory) // 更新下载记录
 }
 
 exports.uploadFile = uploadFile

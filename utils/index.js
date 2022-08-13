@@ -90,7 +90,7 @@ const waitFileDownload = async function(filePath) {
                 clearInterval(fileDownloadTimer) // 清理定时器
                 resolve(true)
             }
-        }, 2000)
+        }, 10000)
     })
 }
 
